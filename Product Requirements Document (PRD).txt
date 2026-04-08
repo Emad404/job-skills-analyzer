@@ -1,0 +1,143 @@
+Product Requirements Document (PRD)
+Job Skills Analyzer
+
+1. Overview
+Product Name: Job Skills Analyzer
+Version: 1.0 (MVP)
+Date: April 2026
+One-liner: منصة إلكترونية تتيح لأي شخص معرفة المهارات والأدوات والشهادات المطلوبة لأي وظيفة — بمجرد كتابة اسمها.
+
+2. Problem Statement
+الطلاب والخريجون والباحثون عن عمل لا يعرفون بالضبط ماذا يتعلمون للدخول إلى سوق العمل. يضيعون وقتهم في كورسات غير مطلوبة، أو يشعرون بالضياع أمام خيارات كثيرة بدون توجيه واضح.
+
+3. Target Users
+
+طلاب الجامعات
+الخريجون الجدد
+الباحثون عن عمل
+من يريدون تغيير مسارهم المهني (Career Switch)
+
+
+4. Goals (MVP)
+
+المستخدم يكتب اسم أي وظيفة ويحصل فوراً على متطلباتها
+العرض يكون منظّماً وواضحاً: Skills / Tools / Certifications
+الموقع سريع وخفيف وسهل الاستخدام
+
+
+5. User Flow
+يدخل المستخدم الموقع
+        ↓
+يكتب اسم الوظيفة (مثال: Data Analyst)
+        ↓
+يضغط زر "تحليل"
+        ↓
+الموقع يرسل الطلب لـ Gemini API
+        ↓
+تظهر النتائج في ثوانٍ مقسّمة بوضوح
+
+6. Features (MVP Scope)
+Feature			Description							 Priority
+Job Input:		حقل نصي لإدخال اسم الوظيفة 					 Must Have
+AI Analysis:		ربط بـ Gemini API لتحليل الوظيفة					 Must Have
+Results Display:	عرض Skills / Tools / Certifications				 Must Have
+Loading State:   	تحميل أثناء انتظار ال ـ API						 Must Have
+Error Handling:		رسالة واضحة عند فشل الطلب						 Must Have
+Results Caching: 	تخزين نتائج الوظائف المكررة في DB					 Nice to Have
+Search History:		عرض آخر الوظائف التي بحث عنها المستخدم				 Nice to Have
+
+7. Tech Stack
+Layer			Technology
+Frontend		Next.js + Tailwind CSSAI 
+AI API			Google Gemini API (gemini-1.5-flash)
+Database: 		LocalStorage (MVP), Supabase/Firebase (Future)
+Hosting			Vercel
+
+8. AI Prompt Specification
+هذا هو الـ System Prompt الذي يُرسل لـ Gemini API:
+You are a job market analyst with expertise in current industry requirements.
+
+When given a job title, respond ONLY with a valid JSON object in this exact format:
+{
+  "skills": ["skill1", "skill2", "skill3"],
+  "tools": ["tool1", "tool2", "tool3"],
+  "certifications": ["cert1", "cert2", "cert3"]
+}
+
+Rules:
+- Return 5-8 items per category
+- Focus on what's actually required in the job market TODAY
+- Skills = soft/hard skills (e.g., Data Analysis, Critical Thinking)
+- Tools = software/platforms (e.g., Python, SQL, Excel)
+- Certifications = recognized certificates (e.g., Google Data Analytics)
+- Do NOT include any text outside the JSON object
+- Do NOT include markdown or code blocks
+
+9. UI/UX Requirements
+الصفحة الرئيسية:
+
+Header بسيط مع اسم الموقع وشعار صغير
+حقل بحث واضح في المنتصف مع placeholder: "اكتب اسم الوظيفة... مثال: Data Analyst"
+زر "تحليل" بجانب الحقل
+قسم النتائج يظهر تحت الحقل بعد الاستجابة
+
+قسم النتائج:
+
+3 بطاقات (Cards) منفصلة:
+
+🔹 المهارات (Skills)
+🔧 الأدوات (Tools)
+📜 الشهادات (Certifications)
+
+
+كل بطاقة تعرض عناصرها كـ Tags أو Chips ملوّنة
+
+تجربة المستخدم:
+
+Loading spinner أثناء الانتظار
+الموقع Responsive يشتغل على الموبايل
+اللغة الإنجليزية للـ UI (الأبسط للـ MVP)
+
+
+10. API Response Example
+Input: Data Analyst
+Expected Output:
+{
+  "skills": ["Data Analysis", "Critical Thinking", "Data Visualization"],
+  "tools": ["Python", "SQL", "Excel", "Tableau", "Power BI"],
+  "certifications": ["Google Data Analytics Certificate", "Microsoft Power BI Data Analyst"]
+}
+
+11. Out of Scope (MVP)
+
+تسجيل الدخول / حسابات المستخدمين
+مقارنة بين وظيفتين
+توصيات كورسات أو روابط تعليمية
+دعم اللغة العربية في الـ UI
+
+
+12. Success Metrics
+Metric			 Target
+Response Time:		 أقل من 5 ثوان 
+ٍAccuracy:		 نتائج منطقية وذات صلة بالوظيفة
+Mobile Usability: 	 يعمل بشكل كامل على الموبايل
+
+13. Technical Implementation Rules (Addendum)
+
+A. Security & Environment:
+- Use a `.env.local` file for the `GEMINI_API_KEY`. Never hardcode keys in the source code.
+- Use the official `@google/generative-ai` SDK for the Gemini integration.
+
+B. Robustness & AI Handling:
+- Implement "JSON Guardrails": The API route must use a Regex or a JSON-repair utility to extract the JSON object from the Gemini response, ensuring it handles cases where the AI might include conversational text.
+- Wrap all API calls in a try/catch block with clear error messaging for the UI.
+
+C. UI/UX Enhancements:
+- Theme: Use a sleek Dark Mode theme by default using Tailwind’s 'slate' colors (e.g., bg-slate-950).
+- Interactivity: Add a "Copy to Clipboard" button/icon on each of the 3 result cards (Skills, Tools, Certifications).
+- Empty States: If the AI returns an empty or invalid result, display a "Job title not recognized. Please try a different role" message.
+
+D. Performance:
+- For the MVP, implement "Results Caching" ONLY using Browser LocalStorage. 
+- Ignore Supabase/Firebase for this version. 
+- Check LocalStorage for the job title key before making an API call.

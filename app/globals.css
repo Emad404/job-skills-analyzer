@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inter is loaded via next/font/google in app/layout.tsx — no @import needed here */
+
+/* ── Global resets & base ───────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Consistent focus outline removed (we use ring utilities per-component) */
+  :focus-visible {
+    outline: none;
+  }
+
+  /* Custom scrollbar — subtle, matches dark/light theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
+  }
+}
+
+/* ── Custom animation utilities ─────────────────────────────────────────────── */
+@layer utilities {
+  /* Ensures animate-fade-in-up starts invisible so the delay feels right */
+  .animate-fade-in-up {
+    animation-fill-mode: both;
+  }
+}
