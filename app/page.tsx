@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BrainCircuit, AlertCircle, Zap } from "lucide-react";
+import { BrainCircuit, AlertCircle, Zap, Copy, Check, ExternalLink } from "lucide-react";
 
 import SearchBar from "@/components/SearchBar";
 import ResultsSection from "@/components/ResultsSection";
@@ -23,6 +23,13 @@ type AppState =
 export default function Home() {
   const [jobTitle, setJobTitle] = useState("");
   const [appState, setAppState] = useState<AppState>({ status: "idle" });
+  const [copiedSection, setCopiedSection] = useState<"roadmap" | "courses" | null>(null);
+
+  const handleCopy = (section: "roadmap" | "courses", content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedSection(section);
+    setTimeout(() => setCopiedSection(null), 2000);
+  };
 
   // ── Submit handler ──────────────────────────────────────────────────────────
   const handleSubmit = async () => {
@@ -145,17 +152,92 @@ export default function Home() {
 
           {/* Success — show results */}
           {appState.status === "success" && (
-            <div>
-              {/* Cache badge */}
-              {appState.fromCache && (
-                <div className="mb-4 flex justify-center">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Loaded from cache
-                  </span>
-                </div>
+            <div className="space-y-12">
+              <div>
+                {/* Cache badge */}
+                {appState.fromCache && (
+                  <div className="mb-4 flex justify-center">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      Loaded from cache
+                    </span>
+                  </div>
+                )}
+                <ResultsSection result={appState.result} />
+              </div>
+
+              {appState.result.roadmap && appState.result.roadmap.length > 0 && (
+                <section className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      Career Roadmap
+                    </h2>
+                    <button
+                      onClick={() => {
+                        const text = appState.result.roadmap!.map((s, i) => `${i + 1}. ${s}`).join("\n");
+                        handleCopy("roadmap", text);
+                      }}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
+                      {copiedSection === "roadmap" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedSection === "roadmap" ? "Copied!" : "Copy list"}
+                    </button>
+                  </div>
+                  
+                  <div className="border-l-2 border-slate-200 dark:border-slate-700 ml-3 pl-6 space-y-6">
+                    {appState.result.roadmap.map((step, idx) => (
+                      <div key={idx} className="relative">
+                        {/* Step marker */}
+                        <span className="absolute -left-[35px] flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 border-2 border-white dark:bg-slate-800 dark:border-slate-950 text-slate-600 dark:text-slate-300 text-xs font-bold font-mono shadow-sm">
+                          {idx + 1}
+                        </span>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 pt-0.5">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               )}
-              <ResultsSection result={appState.result} />
+
+              {appState.result.courses && appState.result.courses.length > 0 && (
+                <section className="animate-fade-in-up" style={{ animationDelay: "320ms" }}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      Recommended Courses
+                    </h2>
+                    <button
+                      onClick={() => {
+                        const text = appState.result.courses!.map(c => 
+                          `${c}: https://www.youtube.com/results?search_query=Best+courses+for+${encodeURIComponent(c)}`
+                        ).join("\n");
+                        handleCopy("courses", text);
+                      }}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
+                      {copiedSection === "courses" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedSection === "courses" ? "Copied!" : "Copy courses"}
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {appState.result.courses.map((course, idx) => (
+                      <a
+                        key={idx}
+                        href={`https://www.youtube.com/results?search_query=Best+courses+for+${encodeURIComponent(course)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50"
+                      >
+                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {course}
+                        </span>
+                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           )}
 

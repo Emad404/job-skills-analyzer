@@ -11,11 +11,14 @@ When given a job title, respond ONLY with a valid JSON object in this exact form
 {
   "skills": ["skill1", "skill2", "skill3"],
   "tools": ["tool1", "tool2", "tool3"],
-  "certifications": ["cert1", "cert2", "cert3"]
+  "certifications": ["cert1", "cert2", "cert3"],
+  "roadmap": ["step1", "step2"],
+  "courses": ["course1", "course2"]
 }
 
 Rules:
-- Return 5-8 items per category
+- Return 5-8 items per category for skills, tools, and certifications
+- Let the AI decide the number of roadmap steps and courses based on job complexity.
 - Focus on what's actually required in the job market TODAY
 - Skills = soft/hard skills (e.g., Data Analysis, Critical Thinking)
 - Tools = software/platforms (e.g., Python, SQL, Excel)
@@ -55,6 +58,12 @@ function extractJson(raw: string): AnalysisResult {
     certifications: parsed.certifications.filter(
       (c): c is string => typeof c === "string"
     ),
+    roadmap: Array.isArray(parsed.roadmap)
+      ? parsed.roadmap.filter((r): r is string => typeof r === "string")
+      : [],
+    courses: Array.isArray(parsed.courses)
+      ? parsed.courses.filter((c): c is string => typeof c === "string")
+      : [],
   };
 }
 
@@ -107,12 +116,16 @@ export async function POST(request: NextRequest) {
     const geminiResult = await model.generateContent(`Job title: ${jobTitle}`);
     const rawText = geminiResult.response.text();
 
+    console.log("[/api/analyze] Raw AI Response:\n", rawText);
+
     const analysisResult = extractJson(rawText);
 
     if (
       analysisResult.skills.length === 0 &&
       analysisResult.tools.length === 0 &&
-      analysisResult.certifications.length === 0
+      analysisResult.certifications.length === 0 &&
+      analysisResult.roadmap.length === 0 &&
+      analysisResult.courses.length === 0
     ) {
       return NextResponse.json({ error: "EMPTY_RESULT" }, { status: 422 });
     }

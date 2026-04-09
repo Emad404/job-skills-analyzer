@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
 // ─── Color scheme types ───────────────────────────────────────────────────────
-type ColorScheme = "blue" | "violet" | "amber";
+type ColorScheme = "blue" | "violet" | "amber" | "emerald" | "rose";
 
 interface ResultCardProps {
   /** Card title shown in the header */
@@ -61,6 +61,26 @@ const schemeStyles: Record<
     iconDot: "bg-amber-500",
     copyHover: "hover:text-amber-500 dark:hover:text-amber-400",
     glow: "hover:shadow-amber-500/10",
+  },
+  emerald: {
+    card: "border-emerald-500/20 dark:border-emerald-500/20",
+    headerIcon:
+      "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+    titleText: "text-emerald-700 dark:text-emerald-300",
+    chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30",
+    iconDot: "bg-emerald-500",
+    copyHover: "hover:text-emerald-500 dark:hover:text-emerald-400",
+    glow: "hover:shadow-emerald-500/10",
+  },
+  rose: {
+    card: "border-rose-500/20 dark:border-rose-500/20",
+    headerIcon:
+      "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
+    titleText: "text-rose-700 dark:text-rose-300",
+    chip: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-500/30",
+    iconDot: "bg-rose-500",
+    copyHover: "hover:text-rose-500 dark:hover:text-rose-400",
+    glow: "hover:shadow-rose-500/10",
   },
 };
 

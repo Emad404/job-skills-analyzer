@@ -9,6 +9,10 @@ export interface AnalysisResult {
   tools: string[];
   /** Recognized certifications recommended for the role (5–8 items) */
   certifications: string[];
+  /** Career progression steps */
+  roadmap: string[];
+  /** Recommended courses */
+  courses: string[];
 }
 
 /**
