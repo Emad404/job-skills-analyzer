@@ -1,4 +1,4 @@
-import { Briefcase, Wrench, Medal, Map, BookOpen } from "lucide-react";
+import { Briefcase, Wrench, Medal } from "lucide-react";
 import ResultCard from "@/components/ResultCard";
 import type { AnalysisResult } from "@/types";
 
@@ -28,20 +28,6 @@ const CARD_CONFIG = [
     icon: <Medal className="w-5 h-5" strokeWidth={1.75} />,
     colorScheme: "amber" as const,
     delay: 160,
-  },
-  {
-    key: "roadmap" as const,
-    title: "Career Roadmap",
-    icon: <Map className="w-5 h-5" strokeWidth={1.75} />,
-    colorScheme: "emerald" as const,
-    delay: 240,
-  },
-  {
-    key: "courses" as const,
-    title: "Recommended Courses",
-    icon: <BookOpen className="w-5 h-5" strokeWidth={1.75} />,
-    colorScheme: "rose" as const,
-    delay: 320,
   },
 ] as const;
 

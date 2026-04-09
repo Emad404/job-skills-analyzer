@@ -167,6 +167,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (error instanceof Error && (error.message.includes("503") || error.message.toLowerCase().includes("service unavailable"))) {
+      return NextResponse.json(
+        { error: "Google Gemini AI is currently overloaded or experiencing downtime. Please try again later." },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again later." },
       { status: 500 }

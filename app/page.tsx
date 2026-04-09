@@ -221,20 +221,33 @@ export default function Home() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    {appState.result.courses.map((course, idx) => (
-                      <a
-                        key={idx}
-                        href={`https://www.youtube.com/results?search_query=Best+courses+for+${encodeURIComponent(course)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50"
-                      >
-                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                          {course}
-                        </span>
-                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                      </a>
-                    ))}
+                    {appState.result.courses.map((course, idx) => {
+                      const isPartner = /(Google|IBM|Meta)/i.test(course);
+                      const targetUrl = isPartner
+                        ? `https://www.google.com/search?q=site:coursera.org+${encodeURIComponent(course)}`
+                        : `https://www.google.com/search?q=${encodeURIComponent(course + " official course link")}`;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50 gap-3"
+                        >
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {course}
+                          </span>
+                          
+                          <a
+                            href={targetUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 w-fit"
+                          >
+                            {isPartner ? "Enroll Now" : "View Course"}
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
