@@ -5,17 +5,28 @@ import type { AnalysisResult } from "@/types";
 // ─────────────────────────────────────────────────────────────────────────────
 // System Prompt
 // ─────────────────────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are a career research database. Your only job is to return accurate, job-market-realistic data for any job title given to you.
+const SYSTEM_PROMPT = `First, determine if the input is a real, recognizable job title or role that exists in any industry worldwide — including technical, medical, legal, business, creative, trade, vocational, and informal roles.
+
+If the input is NOT a valid job title (random characters, nonsense words, offensive terms, or clearly not a job title):
+Return ONLY this JSON:
+{
+  "valid": false,
+  "error": "This doesn't appear to be a valid job title. Please enter a real job role (e.g. 'Software Engineer', 'Nurse', 'Graphic Designer')."
+}
+
+If the input IS a valid job title, return this JSON with valid set to true:
+{
+  "valid": true,
+  "skills": [...],
+  "tools": [...],
+  "certifications": [...],
+  "roadmap": [...],
+  "courses": [...]
+}
+
+You are a career research database. Your only job is to return accurate, job-market-realistic data for any job title given to you.
 
 Return ONLY a valid JSON object. Zero text before or after it. No markdown. No code fences.
-
-{
-  "skills": ["skill1", "skill2", ...],
-  "tools": ["tool1", "tool2", ...],
-  "certifications": ["cert1", "cert2", ...],
-  "roadmap": ["Step 1: ...", "Step 2: ...", ...],
-  "courses": ["Course Name 1", "Course Name 2", ...]
-}
 
 ════════════════════════════════════════
 CORE PRINCIPLE — READ THIS FIRST
@@ -112,12 +123,19 @@ function extractJson(raw: string): AnalysisResult {
   }
 
   const parsed = JSON.parse(match[0]) as {
+    valid?: boolean;
+    error?: string;
     skills?: unknown;
     tools?: unknown;
     certifications?: unknown;
     roadmap?: unknown;
     courses?: unknown;
   };
+
+  // Handle invalid job title returned by the model
+  if (parsed.valid === false) {
+    throw new Error(`INVALID_JOB_TITLE: ${parsed.error ?? "Invalid job title."}`);
+  }
 
   if (
     !Array.isArray(parsed.skills) ||
@@ -138,7 +156,6 @@ function extractJson(raw: string): AnalysisResult {
     roadmap: Array.isArray(parsed.roadmap)
       ? parsed.roadmap.filter((r): r is string => typeof r === "string")
       : [],
-    // courses is now string[] — filter out any objects the model accidentally returns
     courses: Array.isArray(parsed.courses)
       ? parsed.courses.filter((c): c is string => typeof c === "string")
       : [],
@@ -228,6 +245,14 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[/api/analyze] Unhandled error:", error);
 
+    // Add this BEFORE the SyntaxError check
+    if (error instanceof Error && error.message.startsWith("INVALID_JOB_TITLE:")) {
+      const userMessage = error.message.replace("INVALID_JOB_TITLE: ", "");
+      return NextResponse.json(
+        { error: userMessage },
+        { status: 422 }
+      );
+    }
     if (
       error instanceof SyntaxError ||
       (error instanceof Error && error.message.startsWith("NO_JSON")) ||
