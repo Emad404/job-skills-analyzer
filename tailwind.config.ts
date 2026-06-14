@@ -10,21 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-plus-jakarta-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         fadeInUp: {
-          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
         },
       },
       animation: {
-        "fade-in-up": "fadeInUp 0.4s ease-out both",
-        shimmer: "shimmer 1.5s infinite linear",
+        "fade-in-up": "fadeInUp 0.3s ease-out both",
       },
     },
   },

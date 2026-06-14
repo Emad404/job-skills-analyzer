@@ -6,41 +6,50 @@ interface ResultsSectionProps {
   result: AnalysisResult;
 }
 
-// Card configuration — icon, title, color scheme, and stagger delay
 const CARD_CONFIG = [
   {
     key: "skills" as const,
     title: "Skills",
-    icon: <Briefcase className="w-5 h-5" strokeWidth={1.75} />,
-    colorScheme: "blue" as const,
+    icon: <Briefcase className="w-4 h-4" strokeWidth={1.75} />,
+    colorScheme: "indigo" as const,
     delay: 0,
   },
   {
     key: "tools" as const,
     title: "Tools",
-    icon: <Wrench className="w-5 h-5" strokeWidth={1.75} />,
-    colorScheme: "violet" as const,
-    delay: 80,
+    icon: <Wrench className="w-4 h-4" strokeWidth={1.75} />,
+    colorScheme: "cyan" as const,
+    delay: 60,
   },
   {
     key: "certifications" as const,
     title: "Certifications",
-    icon: <Medal className="w-5 h-5" strokeWidth={1.75} />,
-    colorScheme: "amber" as const,
-    delay: 160,
+    icon: <Medal className="w-4 h-4" strokeWidth={1.75} />,
+    colorScheme: "emerald" as const,
+    delay: 120,
   },
 ] as const;
 
 export default function ResultsSection({ result }: ResultsSectionProps) {
   return (
     <section aria-label="Job analysis results" className="w-full">
-      {/* Section heading */}
-      <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6 font-medium">
-        Here&rsquo;s what the job market requires for this role
-      </p>
+      <div
+        className="flex items-center justify-between mb-1 pb-3 border-b"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <h2
+          className="font-semibold uppercase"
+          style={{
+            fontSize: "0.75rem",
+            letterSpacing: "0.06em",
+            color: "var(--text-secondary)",
+          }}
+        >
+          Requirements
+        </h2>
+      </div>
 
-      {/* Responsive card grid: 1 col → 3 col */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
         {CARD_CONFIG.map(({ key, title, icon, colorScheme, delay }) => (
           <ResultCard
             key={key}

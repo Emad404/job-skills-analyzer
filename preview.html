@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSA — Job Skills Analyzer · Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --surface:      #0D1B2A;
+      --surface-2:    #162032;
+      --surface-3:    #1E2D40;
+      --border:       #1E2D3D;
+      --accent:       #2563EB;
+      --accent-hover: #1D4ED8;
+      --text-primary:   #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted:     #4A6179;
+
+      --stripe-skills: #2563EB;
+      --stripe-tools:  #0891B2;
+      --stripe-certs:  #059669;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--surface);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    main { min-height: 100vh; }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+    .wordmark {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+    .theme-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .theme-btn svg { width: 15px; height: 15px; }
+
+    /* ── Hero ── */
+    .hero { margin-bottom: 48px; }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    h1 .accent { color: var(--accent); }
+    .subtitle {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 480px;
+    }
+
+    /* ── Search ── */
+    .search-wrap { margin-bottom: 48px; }
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .search-field {
+      position: relative;
+      flex: 1;
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px 0 42px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 150ms;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    .analyze-btn {
+      height: 52px;
+      width: 120px;
+      flex-shrink: 0;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 150ms;
+    }
+    .analyze-btn:hover { background: var(--accent-hover); }
+    .analyze-btn svg { width: 14px; height: 14px; }
+
+    /* ── Popular roles ── */
+    .roles-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active  { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms;
+    }
+    .copy-btn:hover { background: var(--surface-3); }
+    .copy-btn svg { width: 12px; height: 12px; }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 48px; margin-top: 48px; }
+
+    /* ── Cards grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-left-width: 3px;
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card-skills { border-left-color: var(--stripe-skills); }
+    .card-tools  { border-left-color: var(--stripe-tools);  }
+    .card-certs  { border-left-color: var(--stripe-certs);  }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .card-skills .card-icon { color: var(--stripe-skills); }
+    .card-tools  .card-icon { color: var(--stripe-tools);  }
+    .card-certs  .card-icon { color: var(--stripe-certs);  }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+    }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 150ms;
+    }
+    .icon-btn:hover { background: var(--surface-3); }
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 400;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── Roadmap ── */
+    .roadmap-list { list-style: none; }
+    .roadmap-item {
+      display: flex;
+      gap: 20px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+    }
+    .roadmap-item:first-child { border-top: none; padding-top: 12px; }
+    .step-num {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      width: 16px;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .step-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    /* ── Courses ── */
+    .courses-list { display: flex; flex-direction: column; }
+    .course-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+    }
+    .course-item:first-child { border-top: none; padding-top: 12px; }
+    .course-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+    .course-num {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 20px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .course-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .course-link {
+      flex-shrink: 0;
+      margin-left: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 150ms;
+    }
+    .course-link:hover { opacity: 0.75; }
+    .course-link svg { width: 11px; height: 11px; }
+
+    /* ── Preview badge ── */
+    .preview-badge {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+    .preview-badge strong { color: var(--accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<main>
+  <div class="container">
+
+    <!-- Nav -->
+    <nav>
+      <a href="#" class="wordmark">JSA</a>
+      <button class="theme-btn" title="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1>
+        What does any <span class="accent">job role</span><br>
+        actually require?
+      </h1>
+      <p class="subtitle">
+        Enter a job title below and get a structured breakdown of the exact
+        skills, tools, and certifications hiring managers look for today.
+      </p>
+    </section>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-row">
+        <div class="search-field">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+          <input class="search-input" type="text" value="Data Analyst" placeholder="e.g. Data Analyst, UX Designer, DevOps Engineer…" />
+        </div>
+        <button class="analyze-btn">
+          Analyze
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results">
+
+      <!-- Requirements -->
+      <section>
+        <div class="section-header">
+          <span class="section-label">Requirements</span>
+        </div>
+        <div class="cards-grid">
+
+          <!-- Skills -->
+          <div class="card card-skills">
+            <div class="card-header">
+              <div class="card-title-row">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                  <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                </svg>
+                <span class="card-title">Skills</span>
+              </div>
+              <button class="icon-btn" title="Copy">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <div class="tags">
+              <span class="tag">SQL</span>
+              <span class="tag">Python</span>
+              <span class="tag">Data Visualization</span>
+              <span class="tag">Statistical Analysis</span>
+              <span class="tag">Excel</span>
+              <span class="tag">Critical Thinking</span>
+              <span class="tag">Communication</span>
+              <span class="tag">Business Intelligence</span>
+              <span class="tag">Data Cleaning</span>
+              <span class="tag">Storytelling</span>
+            </div>
+          </div>
+
+          <!-- Tools -->
+          <div class="card card-tools">
+            <div class="card-header">
+              <div class="card-title-row">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+                <span class="card-title">Tools</span>
+              </div>
+              <button class="icon-btn" title="Copy">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <div class="tags">
+              <span class="tag">Tableau</span>
+              <span class="tag">Power BI</span>
+              <span class="tag">PostgreSQL</span>
+              <span class="tag">Jupyter</span>
+              <span class="tag">Pandas</span>
+              <span class="tag">Google Analytics</span>
+              <span class="tag">dbt</span>
+              <span class="tag">Looker</span>
+              <span class="tag">Spark</span>
+            </div>
+          </div>
+
+          <!-- Certifications -->
+          <div class="card card-certs">
+            <div class="card-header">
+              <div class="card-title-row">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                  <circle cx="12" cy="8" r="6"/><path stroke-linecap="round" stroke-linejoin="round" d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+                <span class="card-title">Certifications</span>
+              </div>
+              <button class="icon-btn" title="Copy">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <div class="tags">
+              <span class="tag">Google Data Analytics</span>
+              <span class="tag">IBM Data Analyst</span>
+              <span class="tag">Microsoft PL-300</span>
+              <span class="tag">AWS Data Analytics</span>
+              <span class="tag">Tableau Desktop</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Career Roadmap -->
+      <section>
+        <div class="section-header">
+          <span class="section-label">Career Roadmap</span>
+          <button class="copy-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <ol class="roadmap-list">
+          <li class="roadmap-item">
+            <span class="step-num">1</span>
+            <p class="step-text">Master foundational SQL — write queries, joins, aggregations, and window functions against real datasets from platforms like Mode Analytics or StrataScratch.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">2</span>
+            <p class="step-text">Learn Python for data work: Pandas for manipulation, Matplotlib and Seaborn for visualization, and NumPy for numerical computing.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">3</span>
+            <p class="step-text">Build 2–3 end-to-end portfolio projects that demonstrate data collection, cleaning, analysis, and storytelling with a public-facing dashboard or report.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">4</span>
+            <p class="step-text">Earn the Google Data Analytics or IBM Data Analyst Professional Certificate to validate your skills and signal readiness to employers.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">5</span>
+            <p class="step-text">Learn a BI tool deeply — Tableau or Power BI — and publish interactive dashboards that demonstrate stakeholder-ready communication of findings.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">6</span>
+            <p class="step-text">Develop domain expertise in a specific industry (e-commerce, healthcare, finance) to position yourself as more than a generalist analyst.</p>
+          </li>
+          <li class="roadmap-item">
+            <span class="step-num">7</span>
+            <p class="step-text">Apply for junior analyst or analyst intern roles, practice SQL interviews on LeetCode and case study interviews on platforms like Exponent.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Recommended Courses -->
+      <section>
+        <div class="section-header">
+          <span class="section-label">Recommended Courses</span>
+          <button class="copy-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="courses-list">
+          <div class="course-item">
+            <div class="course-left">
+              <span class="course-num">01</span>
+              <span class="course-name">Google Data Analytics Professional Certificate</span>
+            </div>
+            <a href="#" class="course-link">
+              Enroll
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+          <div class="course-item">
+            <div class="course-left">
+              <span class="course-num">02</span>
+              <span class="course-name">IBM Data Analyst Professional Certificate</span>
+            </div>
+            <a href="#" class="course-link">
+              Enroll
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+          <div class="course-item">
+            <div class="course-left">
+              <span class="course-num">03</span>
+              <span class="course-name">SQL for Data Science — University of California, Davis</span>
+            </div>
+            <a href="#" class="course-link">
+              Enroll
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+          <div class="course-item">
+            <div class="course-left">
+              <span class="course-num">04</span>
+              <span class="course-name">Python for Data Science, AI &amp; Development — IBM</span>
+            </div>
+            <a href="#" class="course-link">
+              Enroll
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+          <div class="course-item">
+            <div class="course-left">
+              <span class="course-num">05</span>
+              <span class="course-name">Data Visualization with Tableau Specialization</span>
+            </div>
+            <a href="#" class="course-link">
+              Enroll
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /results -->
+
+  </div><!-- /container -->
+</main>
+
+<div class="preview-badge">
+  <strong>Preview</strong> · Data Analyst · Static mockup
+</div>
+
+</body>
+</html>

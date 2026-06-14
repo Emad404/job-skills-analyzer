@@ -1,25 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { BrainCircuit, AlertCircle, Zap, Copy, Check, ExternalLink } from "lucide-react";
+import { AlertCircle, Copy, Check, ExternalLink } from "lucide-react";
 
 import SearchBar from "@/components/SearchBar";
 import ResultsSection from "@/components/ResultsSection";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import EmptyState from "@/components/EmptyState";
 import ThemeToggle from "@/components/ThemeToggle";
-import { getCachedResult, setCachedResult } from "@/lib/cache";
 import type { AnalysisResult } from "@/types";
 
-// ─── State type ───────────────────────────────────────────────────────────────
 type AppState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "success"; result: AnalysisResult; fromCache: boolean }
+  | { status: "success"; result: AnalysisResult }
   | { status: "unrecognized" }
   | { status: "error"; message: string };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+const QUICK_ROLES = [
+  "Data Analyst",
+  "Software Engineer",
+  "UX Designer",
+  "Product Manager",
+  "DevOps Engineer",
+  "Cybersecurity Analyst",
+];
+
 export default function Home() {
   const [jobTitle, setJobTitle] = useState("");
   const [appState, setAppState] = useState<AppState>({ status: "idle" });
@@ -31,19 +37,10 @@ export default function Home() {
     setTimeout(() => setCopiedSection(null), 2000);
   };
 
-  // ── Submit handler ──────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     const trimmed = jobTitle.trim();
     if (!trimmed || appState.status === "loading") return;
 
-    // 1. Check LocalStorage cache first (PRD §13.D)
-    const cached = getCachedResult(trimmed);
-    if (cached) {
-      setAppState({ status: "success", result: cached, fromCache: true });
-      return;
-    }
-
-    // 2. No cache hit — call the API
     setAppState({ status: "loading" });
 
     try {
@@ -55,7 +52,6 @@ export default function Home() {
 
       const data = await response.json();
 
-      // 422 = EMPTY_RESULT → unrecognized job title (PRD §13.C)
       if (response.status === 422) {
         setAppState({ status: "unrecognized" });
         return;
@@ -69,9 +65,7 @@ export default function Home() {
         return;
       }
 
-      // 3. Cache successful result in LocalStorage (PRD §13.D)
-      setCachedResult(trimmed, data.result);
-      setAppState({ status: "success", result: data.result, fromCache: false });
+      setAppState({ status: "success", result: data.result });
     } catch {
       setAppState({
         status: "error",
@@ -82,60 +76,48 @@ export default function Home() {
 
   const isLoading = appState.status === "loading";
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="min-h-screen">
+      <div className="mx-auto max-w-[720px] px-6 pt-16 pb-16">
 
-      {/* ── Ambient background glow (dark mode only) ──────────────────────── */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        {/* Top-center blue/violet blob */}
-        <div className="absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-600/10 via-violet-600/8 to-transparent blur-3xl dark:from-blue-600/15 dark:via-violet-600/10" />
-        {/* Bottom right accent */}
-        <div className="absolute -bottom-20 -right-20 h-[400px] w-[400px] rounded-full bg-violet-600/5 blur-3xl dark:bg-violet-600/8" />
-      </div>
-
-      {/* ── Page content ────────────────────────────────────────────────── */}
-      <div className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-
-        {/* ── Header ──────────────────────────────────────────────────── */}
-        <header className="mb-16 flex items-center justify-between">
-          {/* Logo + wordmark */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 shadow-lg shadow-blue-500/20">
-              <BrainCircuit className="h-5 w-5 text-white" strokeWidth={1.75} />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
-              Job Skills Analyzer
-            </span>
-          </div>
-
+        {/* Nav */}
+        <nav className="flex items-center justify-between mb-12">
+          <span
+            className="text-base font-semibold tracking-tight"
+            style={{ color: "var(--accent)", fontWeight: 600 }}
+          >
+            JSA
+          </span>
           <ThemeToggle />
-        </header>
+        </nav>
 
-        {/* ── Hero section ─────────────────────────────────────────────── */}
-        <section className="mb-12 text-center">
-
-          {/* Main heading */}
-          <h1 className="mx-auto mb-4 max-w-2xl text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl">
-            Discover What Any{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-violet-400">
-              Job Role
-            </span>{" "}
-            Requires
+        {/* Hero */}
+        <section className="mb-12">
+          <h1
+            className="font-bold mb-4"
+            style={{
+              fontSize: "2.25rem",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              color: "var(--text-primary)",
+            }}
+          >
+            What does any{" "}
+            <span style={{ color: "var(--accent)" }}>job role</span>
+            <br />
+            actually require?
           </h1>
-
-          {/* Sub-heading */}
-          <p className="mx-auto max-w-lg text-base text-slate-700 dark:text-white sm:text-lg">
-            Type any job title and get an instant breakdown of the skills, tools,
-            and certifications the market demands today.
+          <p
+            className="text-[15px] leading-relaxed max-w-[480px]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Enter a job title below and get a structured breakdown of the exact
+            skills, tools, and certifications hiring managers look for today.
           </p>
         </section>
 
-        {/* ── Search bar ───────────────────────────────────────────────── */}
-        <div className="mb-14">
+        {/* Search */}
+        <div className="mb-12">
           <SearchBar
             value={jobTitle}
             onChange={setJobTitle}
@@ -144,171 +126,167 @@ export default function Home() {
           />
         </div>
 
-        {/* ── Results area ─────────────────────────────────────────────── */}
+        {/* Results */}
         <div>
 
-          {/* Loading skeleton */}
           {appState.status === "loading" && <LoadingSpinner />}
 
-          {/* Success — show results */}
           {appState.status === "success" && (
             <div className="space-y-12">
-              <div>
-                {/* Cache badge */}
-                {appState.fromCache && (
-                  <div className="mb-4 flex justify-center">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      Loaded from cache
-                    </span>
-                  </div>
-                )}
-                <ResultsSection result={appState.result} />
-              </div>
 
-              {appState.result.roadmap && appState.result.roadmap.length > 0 && (
-                <section className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Career Roadmap
-                    </h2>
-                    <button
-                      onClick={() => {
-                        const text = appState.result.roadmap!.map((s, i) => `${i + 1}. ${s}`).join("\n");
-                        handleCopy("roadmap", text);
-                      }}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      {copiedSection === "roadmap" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copiedSection === "roadmap" ? "Copied!" : "Copy list"}
-                    </button>
-                  </div>
-                  
-                  <div className="border-l-2 border-slate-200 dark:border-slate-700 ml-3 pl-6 space-y-6">
+              <ResultsSection result={appState.result} />
+
+              {appState.result.roadmap.length > 0 && (
+                <section className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
+                  <SectionHeader
+                    label="Career Roadmap"
+                    onCopy={() => {
+                      const text = appState.result.roadmap.map((s, i) => `${i + 1}. ${s}`).join("\n");
+                      handleCopy("roadmap", text);
+                    }}
+                    copied={copiedSection === "roadmap"}
+                  />
+                  <ol>
                     {appState.result.roadmap.map((step, idx) => (
-                      <div key={idx} className="relative">
-                        {/* Step marker */}
-                        <span className="absolute -left-[35px] flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 border-2 border-white dark:bg-slate-800 dark:border-slate-950 text-slate-600 dark:text-slate-300 text-xs font-bold font-mono shadow-sm">
+                      <li
+                        key={idx}
+                        className="flex gap-5 py-4"
+                        style={{
+                          borderTop: idx === 0 ? "none" : `1px solid var(--border)`,
+                        }}
+                      >
+                        <span
+                          className="flex-shrink-0 text-xs font-bold tabular-nums w-4 mt-0.5"
+                          style={{ color: "var(--accent)" }}
+                        >
                           {idx + 1}
                         </span>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 pt-0.5">
+                        <p
+                          className="text-sm leading-relaxed"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
                           {step}
                         </p>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+
+              {appState.result.courses.length > 0 && (
+                <section className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
+                  <SectionHeader
+                    label="Recommended Courses"
+                    onCopy={() => {
+                      const text = appState.result.courses.join("\n");
+                      handleCopy("courses", text);
+                    }}
+                    copied={copiedSection === "courses"}
+                  />
+                  <div>
+                    {appState.result.courses.map((courseName, idx) => (
+                      <div
+                        key={courseName}
+                        className="flex items-center justify-between py-4"
+                        style={{
+                          borderTop: idx === 0 ? "none" : `1px solid var(--border)`,
+                        }}
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <span
+                            className="flex-shrink-0 text-xs font-mono font-semibold w-5 text-right tabular-nums"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            {String(idx + 1).padStart(2, "0")}
+                          </span>
+                          <span
+                            className="text-sm font-medium truncate"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {courseName}
+                          </span>
+                        </div>
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(courseName)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0 ml-6 inline-flex items-center gap-1 text-xs font-semibold transition-colors"
+                          style={{ color: "var(--accent)" }}
+                        >
+                          View
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
                       </div>
                     ))}
                   </div>
                 </section>
               )}
-
-              {appState.result.courses && appState.result.courses.length > 0 && (
-                <section className="animate-fade-in-up" style={{ animationDelay: "320ms" }}>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Recommended Courses
-                    </h2>
-                    <button
-                      onClick={() => {
-                        const text = appState.result.courses!.map(c => 
-                          `${c}: https://www.youtube.com/results?search_query=Best+courses+for+${encodeURIComponent(c)}`
-                        ).join("\n");
-                        handleCopy("courses", text);
-                      }}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      {copiedSection === "courses" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copiedSection === "courses" ? "Copied!" : "Copy courses"}
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    {appState.result.courses.map((course, idx) => {
-                      const isPartner = /(Google|IBM|Meta)/i.test(course);
-                      const targetUrl = isPartner
-                        ? `https://www.google.com/search?q=site:coursera.org+${encodeURIComponent(course)}`
-                        : `https://www.google.com/search?q=${encodeURIComponent(course + " official course link")}`;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50 gap-3"
-                        >
-                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {course}
-                          </span>
-                          
-                          <a
-                            href={targetUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 w-fit"
-                          >
-                            {isPartner ? "Enroll Now" : "View Course"}
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
             </div>
           )}
 
-          {/* Unrecognized job title (422) */}
-          {appState.status === "unrecognized" && (
-            <EmptyState isUnrecognized />
-          )}
+          {appState.status === "unrecognized" && <EmptyState isUnrecognized />}
 
-          {/* Error state */}
           {appState.status === "error" && (
-            <div className="animate-fade-in-up flex flex-col items-center gap-4 py-14 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10">
-                <AlertCircle
-                  className="h-7 w-7 text-red-500 dark:text-red-400"
-                  strokeWidth={1.75}
-                />
+            <div className="animate-fade-in-up py-14">
+              <div className="flex items-start gap-4 max-w-sm">
+                <div
+                  className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-lg border"
+                  style={{
+                    borderColor: "rgba(239,68,68,0.3)",
+                    backgroundColor: "rgba(239,68,68,0.05)",
+                  }}
+                >
+                  <AlertCircle
+                    className="h-5 w-5"
+                    strokeWidth={1.75}
+                    style={{ color: "#ef4444" }}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                    {appState.message.includes("quota") ? "API Quota Exceeded" :
+                     appState.message.includes("overloaded") ? "Service Unavailable" :
+                     "Something went wrong"}
+                  </p>
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
+                    {appState.message}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="inline-flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-xs font-medium transition-colors duration-150 border"
+                    style={{
+                      borderColor: "var(--border)",
+                      backgroundColor: "var(--surface-3)",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    Try again
+                  </button>
+                </div>
               </div>
-              <div className="max-w-sm">
-                <h2 className="mb-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  Something went wrong
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {appState.message}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="mt-1 rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              >
-                Try again
-              </button>
             </div>
           )}
 
-          {/* Idle — subtle prompt */}
           {appState.status === "idle" && (
-            <div className="flex flex-col items-center gap-3 py-10 text-center">
-              <p className="text-sm font-medium text-slate-700 dark:text-white">
-                Enter a job title above to get started
+            <div className="py-4">
+              <p
+                className="font-medium uppercase mb-3"
+                style={{
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.08em",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Popular roles
               </p>
-              {/* Popular role quick-picks */}
-              <div className="flex flex-wrap justify-center gap-2 mt-2">
-                {[
-                  "Data Analyst",
-                  "Software Engineer",
-                  "UX Designer",
-                  "Product Manager",
-                  "DevOps Engineer",
-                  "Cybersecurity Analyst",
-                ].map((role) => (
+              <div className="flex flex-wrap gap-2">
+                {QUICK_ROLES.map((role) => (
                   <button
                     key={role}
                     type="button"
-                    onClick={() => {
-                      setJobTitle(role);
-                    }}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:hover:border-blue-500/40 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
+                    onClick={() => setJobTitle(role)}
+                    className="chip-role rounded px-3 py-1.5 text-xs font-medium"
                   >
                     {role}
                   </button>
@@ -316,8 +294,59 @@ export default function Home() {
               </div>
             </div>
           )}
+
         </div>
       </div>
     </main>
+  );
+}
+
+function SectionHeader({
+  label,
+  onCopy,
+  copied,
+}: {
+  label: string;
+  onCopy: () => void;
+  copied: boolean;
+}) {
+  return (
+    <div
+      className="flex items-center justify-between mb-1 pb-3 border-b"
+      style={{ borderColor: "var(--border)" }}
+    >
+      <h2
+        className="font-semibold uppercase"
+        style={{
+          fontSize: "0.75rem",
+          letterSpacing: "0.06em",
+          color: "var(--text-secondary)",
+        }}
+      >
+        {label}
+      </h2>
+      <button
+        onClick={onCopy}
+        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors duration-150 border"
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "var(--surface-2)",
+          color: "var(--text-secondary)",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--surface-3)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--surface-2)";
+        }}
+      >
+        {copied ? (
+          <Check className="w-3 h-3" strokeWidth={2.5} style={{ color: "var(--accent)" }} />
+        ) : (
+          <Copy className="w-3 h-3" strokeWidth={2} />
+        )}
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
   );
 }

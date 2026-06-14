@@ -3,88 +3,31 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-// ─── Color scheme types ───────────────────────────────────────────────────────
-type ColorScheme = "blue" | "violet" | "amber" | "emerald" | "rose";
+type ColorScheme = "indigo" | "cyan" | "emerald";
 
 interface ResultCardProps {
-  /** Card title shown in the header */
   title: string;
-  /** Lucide icon component to render */
   icon: React.ReactNode;
-  /** Array of skill/tool/cert string items */
   items: string[];
-  /** Controls chip and accent colors */
   colorScheme: ColorScheme;
-  /** Staggered animation delay (ms) */
   animationDelay?: number;
 }
 
-// ─── Color scheme maps ────────────────────────────────────────────────────────
-const schemeStyles: Record<
-  ColorScheme,
-  {
-    card: string;
-    headerIcon: string;
-    titleText: string;
-    chip: string;
-    iconDot: string;
-    copyHover: string;
-    glow: string;
-  }
-> = {
-  blue: {
-    card: "border-blue-500/20 dark:border-blue-500/20",
-    headerIcon:
-      "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
-    titleText: "text-blue-700 dark:text-blue-300",
-    chip: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-500/30",
-    iconDot: "bg-blue-500",
-    copyHover: "hover:text-blue-500 dark:hover:text-blue-400",
-    glow: "hover:shadow-blue-500/10",
+const schemeStyles: Record<ColorScheme, { stripeColor: string; iconColor: string }> = {
+  indigo: {
+    stripeColor: "#4F46E5",
+    iconColor: "#4F46E5",
   },
-  violet: {
-    card: "border-violet-500/20 dark:border-violet-500/20",
-    headerIcon:
-      "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
-    titleText: "text-violet-700 dark:text-violet-300",
-    chip: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-500/30",
-    iconDot: "bg-violet-500",
-    copyHover: "hover:text-violet-500 dark:hover:text-violet-400",
-    glow: "hover:shadow-violet-500/10",
-  },
-  amber: {
-    card: "border-amber-500/20 dark:border-amber-500/20",
-    headerIcon:
-      "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
-    titleText: "text-amber-700 dark:text-amber-300",
-    chip: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/30",
-    iconDot: "bg-amber-500",
-    copyHover: "hover:text-amber-500 dark:hover:text-amber-400",
-    glow: "hover:shadow-amber-500/10",
+  cyan: {
+    stripeColor: "#0891B2",
+    iconColor: "#0891B2",
   },
   emerald: {
-    card: "border-emerald-500/20 dark:border-emerald-500/20",
-    headerIcon:
-      "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-    titleText: "text-emerald-700 dark:text-emerald-300",
-    chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30",
-    iconDot: "bg-emerald-500",
-    copyHover: "hover:text-emerald-500 dark:hover:text-emerald-400",
-    glow: "hover:shadow-emerald-500/10",
-  },
-  rose: {
-    card: "border-rose-500/20 dark:border-rose-500/20",
-    headerIcon:
-      "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
-    titleText: "text-rose-700 dark:text-rose-300",
-    chip: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-500/30",
-    iconDot: "bg-rose-500",
-    copyHover: "hover:text-rose-500 dark:hover:text-rose-400",
-    glow: "hover:shadow-rose-500/10",
+    stripeColor: "#059669",
+    iconColor: "#059669",
   },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function ResultCard({
   title,
   icon,
@@ -99,109 +42,74 @@ export default function ResultCard({
     try {
       await navigator.clipboard.writeText(items.join(", "));
       setCopied(true);
-      // Reset back to copy icon after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard API unavailable — silently fail
+      // Clipboard API unavailable
     }
   };
 
   return (
     <div
-      className={[
-        // Base card styles
-        "relative rounded-2xl border p-6 flex flex-col gap-5",
-        // Light / Dark surfaces
-        "bg-slate-100 dark:bg-slate-900",
-        "border-slate-200 dark:border-slate-800",
-        // Colour-scheme accent border override
-        styles.card,
-        // Hover glow
-        "hover:shadow-xl",
-        styles.glow,
-        // Fade-in-up animation (defined in tailwind.config)
-        "animate-fade-in-up",
-        // Smooth transitions
-        "transition-shadow duration-300",
-      ].join(" ")}
-      style={{ animationDelay: `${animationDelay}ms` }}
+      className="flex flex-col gap-5 rounded-lg border-l-[3px] animate-fade-in-up"
+      style={{
+        backgroundColor: "var(--surface-2)",
+        border: "1px solid var(--border)",
+        borderLeftColor: styles.stripeColor,
+        borderRadius: "8px",
+        padding: "20px 24px",
+        animationDelay: `${animationDelay}ms`,
+      }}
     >
-      {/* ── Card Header ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Icon badge */}
-          <div
-            className={[
-              "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-              styles.headerIcon,
-            ].join(" ")}
-          >
-            {icon}
-          </div>
-
-          {/* Title */}
+        <div className="flex items-center gap-2.5">
+          <span style={{ color: styles.iconColor }}>{icon}</span>
           <h2
-            className={[
-              "text-base font-semibold tracking-wide",
-              styles.titleText,
-            ].join(" ")}
+            className="font-semibold uppercase"
+            style={{
+              fontSize: "0.75rem",
+              letterSpacing: "0.06em",
+              color: "var(--text-secondary)",
+            }}
           >
             {title}
           </h2>
         </div>
 
-        {/* Copy to Clipboard button */}
         <button
-          id={`copy-${title.toLowerCase().replace(/\s+/g, "-")}`}
           type="button"
           onClick={handleCopy}
-          aria-label={
-            copied ? `${title} copied to clipboard` : `Copy ${title} to clipboard`
-          }
+          aria-label={copied ? `${title} copied` : `Copy ${title}`}
           title={copied ? "Copied!" : "Copy to clipboard"}
-          className={[
-            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-            "text-slate-400 dark:text-slate-500",
-            styles.copyHover,
-            "bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800",
-            "active:scale-90",
-            "transition-all duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-slate-400",
-          ].join(" ")}
+          className="w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-150"
+          style={{ color: "var(--text-muted)" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--surface-3)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+          }}
         >
           {copied ? (
-            // Checkmark confirmation
-            <Check className="w-4 h-4 text-emerald-500" strokeWidth={2.5} />
+            <Check className="w-3.5 h-3.5" strokeWidth={2.5} style={{ color: styles.iconColor }} />
           ) : (
-            <Copy className="w-4 h-4" strokeWidth={2} />
+            <Copy className="w-3.5 h-3.5" strokeWidth={2} />
           )}
         </button>
       </div>
 
-      {/* ── Item count pill ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2">
-        <span
-          className={[
-            "inline-block w-2 h-2 rounded-full flex-shrink-0",
-            styles.iconDot,
-          ].join(" ")}
-        />
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-          {items.length} {items.length === 1 ? "item" : "items"}
-        </span>
-      </div>
-
-      {/* ── Chips ────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item, index) => (
           <span
             key={`${item}-${index}`}
-            className={[
-              "inline-flex items-center px-3 py-1.5 rounded-full",
-              "text-sm font-medium",
-              "transition-colors duration-150 cursor-default",
-              styles.chip,
-            ].join(" ")}
+            className="inline-flex items-center cursor-default"
+            style={{
+              backgroundColor: "var(--surface-3)",
+              border: "1px solid var(--border)",
+              color: "var(--text-primary)",
+              fontSize: "0.8rem",
+              padding: "4px 10px",
+              borderRadius: "4px",
+            }}
           >
             {item}
           </span>

@@ -2,26 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inter is loaded via next/font/google in app/layout.tsx — no @import needed here */
-
-/* ── Global resets & base ───────────────────────────────────────────────────── */
 @layer base {
+  :root {
+    --accent: #4F46E5;
+    --accent-hover: #4338CA;
+    --surface: #FAFAFA;
+    --surface-2: #FFFFFF;
+    --surface-3: #F4F4F5;
+    --border: #E4E4E7;
+    --text-primary: #09090B;
+    --text-secondary: #52525B;
+    --text-muted: #A1A1AA;
+  }
+
+  .dark {
+    --surface: #0A0A0A;
+    --surface-2: #111111;
+    --surface-3: #1A1A1A;
+    --border: #222222;
+    --text-primary: #F5F5F5;
+    --text-secondary: #A1A1AA;
+    --text-muted: #52525B;
+  }
+
   html {
     scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    transition: background-color 300ms, color 300ms;
   }
 
-  /* Consistent focus outline removed (we use ring utilities per-component) */
   :focus-visible {
     outline: none;
   }
 
-  /* Custom scrollbar — subtle, matches dark/light theme */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -30,16 +47,60 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+    background-color: var(--border);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400 dark:bg-slate-600;
+    background-color: var(--text-muted);
   }
 }
 
-/* ── Custom animation utilities ─────────────────────────────────────────────── */
+@layer components {
+  .input-app {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .input-app::placeholder {
+    color: var(--text-muted);
+  }
+  .input-app:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .input-app:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-accent {
+    background-color: var(--accent);
+    color: white;
+    transition: background-color 150ms;
+  }
+  .btn-accent:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+  }
+  .btn-accent:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .chip-role {
+    background-color: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    transition: border-color 150ms, color 150ms;
+  }
+  .chip-role:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
 @layer utilities {
-  /* Ensures animate-fade-in-up starts invisible so the delay feels right */
   .animate-fade-in-up {
     animation-fill-mode: both;
   }

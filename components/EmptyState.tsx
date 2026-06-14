@@ -1,9 +1,7 @@
 import { SearchX } from "lucide-react";
 
 interface EmptyStateProps {
-  /** true = triggered by a 422 EMPTY_RESULT from /api/analyze */
   isUnrecognized?: boolean;
-  /** Custom message override */
   message?: string;
 }
 
@@ -14,59 +12,62 @@ export default function EmptyState({
   const displayMessage =
     message ??
     (isUnrecognized
-      ? "Job title not recognized. Please try a different role."
-      : "No results found. Try searching for a specific job title.");
+      ? "We couldn't find data for that job title. Try a more common role."
+      : "No results found. Try a different job title.");
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="animate-fade-in-up flex flex-col items-center justify-center gap-5 py-16 px-6 text-center"
-    >
-      {/* Icon */}
-      <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-        <SearchX
-          className="w-8 h-8 text-slate-400 dark:text-slate-500"
-          strokeWidth={1.5}
-        />
-      </div>
-
-      {/* Heading */}
-      <div className="flex flex-col gap-2 max-w-sm">
-        <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-200">
-          {isUnrecognized ? "Role Not Recognized" : "No Results"}
-        </h2>
-
-        {/* Message */}
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-          {displayMessage}
-        </p>
-      </div>
-
-      {/* Suggestion pills */}
-      {isUnrecognized && (
-        <div className="flex flex-col items-center gap-2 mt-1">
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">
-            Try one of these
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {[
-              "Data Analyst",
-              "UX Designer",
-              "Software Engineer",
-              "Product Manager",
-              "DevOps Engineer",
-            ].map((suggestion) => (
-              <span
-                key={suggestion}
-                className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-              >
-                {suggestion}
-              </span>
-            ))}
-          </div>
+    <div role="status" aria-live="polite" className="animate-fade-in-up py-14">
+      <div className="flex items-start gap-4 max-w-sm">
+        <div
+          className="flex-shrink-0 w-10 h-10 rounded-lg border flex items-center justify-center"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface-3)",
+          }}
+        >
+          <SearchX
+            className="w-5 h-5"
+            strokeWidth={1.5}
+            style={{ color: "var(--text-muted)" }}
+          />
         </div>
-      )}
+        <div>
+          <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+            {isUnrecognized ? "Role not recognized" : "No results"}
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {displayMessage}
+          </p>
+
+          {isUnrecognized && (
+            <div className="mt-4">
+              <p
+                className="text-[0.7rem] font-medium uppercase mb-2"
+                style={{ letterSpacing: "0.08em", color: "var(--text-muted)" }}
+              >
+                Try one of these
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["Data Analyst", "UX Designer", "Software Engineer", "Product Manager"].map(
+                  (s) => (
+                    <span
+                      key={s}
+                      className="px-2.5 py-1 rounded text-xs font-medium border"
+                      style={{
+                        borderColor: "var(--border)",
+                        color: "var(--text-secondary)",
+                        backgroundColor: "var(--surface-3)",
+                      }}
+                    >
+                      {s}
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

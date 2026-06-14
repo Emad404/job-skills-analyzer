@@ -1,36 +1,43 @@
-// Three skeleton cards that pulse while the API call is in flight.
-// Uses Tailwind's built-in animate-pulse — no custom keyframes needed.
-
-function SkeletonChip({ width }: { width: string }) {
+function SkeletonTag({ width }: { width: string }) {
   return (
     <div
-      className={`h-7 rounded-full bg-slate-200 dark:bg-slate-700 ${width}`}
+      className={`h-6 rounded ${width}`}
+      style={{ backgroundColor: "var(--surface-3)" }}
     />
   );
 }
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 p-6 flex flex-col gap-5 animate-pulse">
-      {/* Header row */}
-      <div className="flex items-center gap-3">
-        {/* Icon badge placeholder */}
-        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
-        {/* Title placeholder */}
-        <div className="h-4 w-24 rounded-full bg-slate-200 dark:bg-slate-700" />
+    <div
+      className="rounded-lg border-l-[3px] flex flex-col gap-5 animate-pulse"
+      style={{
+        border: "1px solid var(--border)",
+        borderLeftColor: "var(--border)",
+        backgroundColor: "var(--surface-2)",
+        borderRadius: "8px",
+        padding: "20px 24px",
+      }}
+    >
+      <div className="flex items-center gap-2.5">
+        <div
+          className="w-4 h-4 rounded flex-shrink-0"
+          style={{ backgroundColor: "var(--surface-3)" }}
+        />
+        <div
+          className="h-3 w-16 rounded"
+          style={{ backgroundColor: "var(--surface-3)" }}
+        />
       </div>
-
-      {/* Item count placeholder */}
-      <div className="h-3 w-14 rounded-full bg-slate-200 dark:bg-slate-700" />
-
-      {/* Chip placeholders — varied widths for realistic skeleton */}
-      <div className="flex flex-wrap gap-2">
-        <SkeletonChip width="w-20" />
-        <SkeletonChip width="w-28" />
-        <SkeletonChip width="w-16" />
-        <SkeletonChip width="w-24" />
-        <SkeletonChip width="w-20" />
-        <SkeletonChip width="w-32" />
+      <div className="flex flex-wrap gap-1.5">
+        <SkeletonTag width="w-14" />
+        <SkeletonTag width="w-20" />
+        <SkeletonTag width="w-12" />
+        <SkeletonTag width="w-24" />
+        <SkeletonTag width="w-16" />
+        <SkeletonTag width="w-20" />
+        <SkeletonTag width="w-28" />
+        <SkeletonTag width="w-14" />
       </div>
     </div>
   );
@@ -39,13 +46,16 @@ function SkeletonCard() {
 export default function LoadingSpinner() {
   return (
     <section aria-busy="true" aria-label="Loading analysis results">
-      {/* Status message */}
-      <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6 font-medium animate-pulse">
-        Analyzing job market data…
-      </p>
-
-      {/* Three skeleton cards matching the ResultsSection layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div
+        className="flex items-center justify-between mb-1 pb-3 border-b"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <div
+          className="h-3 w-24 rounded animate-pulse"
+          style={{ backgroundColor: "var(--surface-3)" }}
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
         <SkeletonCard />
         <SkeletonCard />
         <SkeletonCard />

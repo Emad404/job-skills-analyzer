@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/providers";
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-plus-jakarta-sans",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -35,11 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // suppressHydrationWarning is required by next-themes:
-    // it prevents React from warning about the `class` attribute
-    // being set on <html> before hydration completes.
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300`}>
+      <body className={`${plusJakartaSans.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
